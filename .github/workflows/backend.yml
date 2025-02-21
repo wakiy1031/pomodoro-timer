@@ -15,9 +15,6 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: backend
 
     services:
       postgres:
@@ -40,19 +37,15 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: "3.2.2"
-          bundler-cache: true
           working-directory: backend
-
-      - name: Install dependencies
-        run: |
-          gem install bundler
-          bundle install
+          bundler-cache: true
 
       - name: Generate RSpec files
-        run: |
-          bundle exec rails generate rspec:install
+        working-directory: backend
+        run: bundle exec rails generate rspec:install
 
       - name: Setup test database
+        working-directory: backend
         env:
           RAILS_ENV: test
         run: |
@@ -60,6 +53,7 @@ jobs:
           bundle exec rails db:create db:schema:load
 
       - name: Run tests
+        working-directory: backend
         env:
           RAILS_ENV: test
         run: bundle exec rspec
