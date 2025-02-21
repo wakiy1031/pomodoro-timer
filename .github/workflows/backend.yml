@@ -43,10 +43,18 @@ jobs:
           bundler-cache: true
           working-directory: backend
 
+      - name: Install dependencies
+        run: |
+          gem install bundler
+          bundle install
+
+      - name: Generate RSpec files
+        run: |
+          bundle exec rails generate rspec:install
+
       - name: Setup test database
         env:
           RAILS_ENV: test
-          BUNDLE_GEMFILE: ${{ github.workspace }}/backend/Gemfile
         run: |
           cp config/database.yml.ci config/database.yml
           bundle exec rails db:create db:schema:load
@@ -54,5 +62,4 @@ jobs:
       - name: Run tests
         env:
           RAILS_ENV: test
-          BUNDLE_GEMFILE: ${{ github.workspace }}/backend/Gemfile
         run: bundle exec rspec
