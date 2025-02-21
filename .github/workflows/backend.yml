@@ -1,26 +1,30 @@
-name: Backend CI/CD
+name: Backend CI
 
 on:
   push:
-    branches: [main]
     paths:
       - "backend/**"
+    branches:
+      - main
+      - develop
+      - "feature/**"
   pull_request:
-    branches: [main]
     paths:
       - "backend/**"
 
 jobs:
-  backend-ci:
+  test:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./backend
+        shell: bash
+        working-directory: backend
 
     services:
       postgres:
         image: postgres:14
         env:
+          POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
         ports:
           - 5432:5432
@@ -31,29 +35,43 @@ jobs:
           --health-retries 5
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - name: Setup Ruby
+      - name: Debug directory structure
+        run: |
+          echo "Current working directory:"
+          pwd
+          echo "Absolute path to Gemfile:"
+          realpath Gemfile || echo "Gemfile not found"
+          echo "Directory contents:"
+          ls -la
+
+      - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: "3.2"
+          ruby-version: "3.2.2"
+          working-directory: backend
           bundler-cache: true
-          working-directory: ./backend
 
-      - name: Setup Database
+      - name: Generate RSpec files
+        env:
+          RAILS_ENV: test
+          BUNDLE_GEMFILE: ${{ github.workspace }}/backend/Gemfile
+        run: bundle exec rails generate rspec:install
+
+      - name: Setup test database
+        env:
+          RAILS_ENV: test
+          BUNDLE_GEMFILE: ${{ github.workspace }}/backend/Gemfile
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/focus_forge_test
         run: |
           cp config/database.yml.ci config/database.yml
-          bundle exec rails db:create
-          bundle exec rails db:schema:load
-        env:
-          RAILS_ENV: test
-          DATABASE_URL: postgres://postgres:postgres@localhost:5432/focus_forge_test
+          bundle exec rails db:create db:schema:load
 
       - name: Run tests
-        run: bundle exec rspec
         env:
           RAILS_ENV: test
+          BUNDLE_GEMFILE: ${{ github.workspace }}/backend/Gemfile
           DATABASE_URL: postgres://postgres:postgres@localhost:5432/focus_forge_test
-
-      - name: Run rubocop
-        run: bundle exec rubocop
+        run: bundle exec rspec

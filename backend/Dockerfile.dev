@@ -1,0 +1,22 @@
+ARG RUBY_VERSION=3.2.2
+FROM docker.io/library/ruby:$RUBY_VERSION-slim
+
+# 必要なパッケージをインストール
+RUN apt-get update -qq && apt-get install -y \
+  build-essential \
+  libpq-dev \
+  postgresql-client
+
+# アプリケーションディレクトリを作成
+WORKDIR /app
+
+# Gemfile と Gemfile.lock をコピーし、依存関係をインストール
+COPY Gemfile /app/Gemfile
+COPY Gemfile.lock /app/Gemfile.lock
+RUN bundle install
+
+# アプリケーションの全ファイルをコンテナ内にコピー
+COPY . /app
+
+# サーバー起動
+CMD ["rails", "server", "-b", "0.0.0.0"] 
