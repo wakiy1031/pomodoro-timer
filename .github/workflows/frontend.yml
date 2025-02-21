@@ -1,40 +1,61 @@
-name: Frontend CI/CD
+name: Frontend CI
 
 on:
   push:
-    branches: [main]
     paths:
       - "frontend/**"
+    branches:
+      - main
+      - develop
+      - "feature/**"
   pull_request:
-    branches: [main]
     paths:
       - "frontend/**"
 
 jobs:
-  frontend-ci:
+  test:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./frontend
+        shell: bash
+        working-directory: frontend
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "18"
-          cache: "npm"
-          cache-dependency-path: "./frontend/package-lock.json"
+          node-version: "20"
+
+      - name: Debug environment
+        run: |
+          echo "Node version:"
+          node --version
+          echo "NPM version:"
+          npm --version
+          echo "Current working directory:"
+          pwd
+          echo "Directory contents:"
+          ls -la
 
       - name: Install dependencies
-        run: npm ci
+        run: |
+          echo "Installing dependencies..."
+          npm install
+          echo "Installed packages:"
+          npm list
+          echo "Checking next binary:"
+          ls -la node_modules/.bin/next
+          echo "Checking next version:"
+          ./node_modules/.bin/next --version
 
-      - name: Lint
-        run: npm run lint
+      - name: Run lint
+        run: ./node_modules/.bin/next lint
 
-      - name: Type check
+      - name: Run type check
         run: npm run type-check
 
       - name: Build
-        run: npm run build
+        run: ./node_modules/.bin/next build
