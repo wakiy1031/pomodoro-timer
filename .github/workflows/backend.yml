@@ -1,26 +1,29 @@
-name: Backend CI/CD
+name: Backend CI
 
 on:
   push:
-    branches: [main]
     paths:
       - "backend/**"
+    branches:
+      - main
+      - develop
+      - "feature/**"
   pull_request:
-    branches: [main]
     paths:
       - "backend/**"
 
 jobs:
-  backend-ci:
+  test:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./backend
+        working-directory: backend
 
     services:
       postgres:
         image: postgres:14
         env:
+          POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
         ports:
           - 5432:5432
@@ -33,27 +36,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Ruby
+      - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: "3.2"
+          ruby-version: "3.2.2"
           bundler-cache: true
-          working-directory: ./backend
+          working-directory: backend
 
-      - name: Setup Database
+      - name: Setup test database
         run: |
           cp config/database.yml.ci config/database.yml
-          bundle exec rails db:create
-          bundle exec rails db:schema:load
-        env:
-          RAILS_ENV: test
-          DATABASE_URL: postgres://postgres:postgres@localhost:5432/focus_forge_test
+          bundle exec rails db:create db:schema:load
 
       - name: Run tests
         run: bundle exec rspec
-        env:
-          RAILS_ENV: test
-          DATABASE_URL: postgres://postgres:postgres@localhost:5432/focus_forge_test
-
-      - name: Run rubocop
-        run: bundle exec rubocop

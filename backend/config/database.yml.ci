@@ -1,0 +1,9 @@
+test:
+  adapter: postgresql
+  encoding: unicode
+  pool: 5
+  database: focus_forge_test
+  username: postgres
+  password: postgres
+  host: localhost
+  port: 5432 
