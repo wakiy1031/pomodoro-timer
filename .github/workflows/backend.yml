@@ -15,6 +15,9 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    env:
+      BUNDLE_GEMFILE: ${{ github.workspace }}/backend/Gemfile
+      RAILS_ENV: test
 
     services:
       postgres:
@@ -37,8 +40,13 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: "3.2.2"
-          working-directory: backend
-          bundler-cache: true
+
+      - name: Install dependencies
+        working-directory: backend
+        run: |
+          gem install bundler
+          bundle config set --local path 'vendor/bundle'
+          bundle install --jobs 4
 
       - name: Generate RSpec files
         working-directory: backend
@@ -46,14 +54,10 @@ jobs:
 
       - name: Setup test database
         working-directory: backend
-        env:
-          RAILS_ENV: test
         run: |
           cp config/database.yml.ci config/database.yml
           bundle exec rails db:create db:schema:load
 
       - name: Run tests
         working-directory: backend
-        env:
-          RAILS_ENV: test
         run: bundle exec rspec
