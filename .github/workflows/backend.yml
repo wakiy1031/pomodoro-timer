@@ -15,6 +15,10 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: backend
 
     services:
       postgres:
@@ -38,44 +42,36 @@ jobs:
         run: |
           echo "Current working directory:"
           pwd
-          echo "List workspace root:"
+          echo "Absolute path to Gemfile:"
+          realpath Gemfile || echo "Gemfile not found"
+          echo "Directory contents:"
           ls -la
-          echo "List .github directory:"
-          ls -la .github
-          echo "List backend directory:"
-          ls -la backend
-          echo "Check Gemfile existence:"
-          test -f backend/Gemfile && echo "Gemfile exists" || echo "Gemfile not found"
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: "3.2.2"
           working-directory: backend
-
-      - name: Bundle install
-        run: |
-          cd backend
-          bundle install
+          bundler-cache: true
 
       - name: Generate RSpec files
-        run: |
-          cd backend
-          bundle exec rails generate rspec:install
+        env:
+          RAILS_ENV: test
+          BUNDLE_GEMFILE: ${{ github.workspace }}/backend/Gemfile
+        run: bundle exec rails generate rspec:install
 
       - name: Setup test database
+        env:
+          RAILS_ENV: test
+          BUNDLE_GEMFILE: ${{ github.workspace }}/backend/Gemfile
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/focus_forge_test
         run: |
-          cd backend
           cp config/database.yml.ci config/database.yml
           bundle exec rails db:create db:schema:load
-        env:
-          RAILS_ENV: test
-          DATABASE_URL: postgres://postgres:postgres@localhost:5432/focus_forge_test
 
       - name: Run tests
-        run: |
-          cd backend
-          bundle exec rspec
         env:
           RAILS_ENV: test
+          BUNDLE_GEMFILE: ${{ github.workspace }}/backend/Gemfile
           DATABASE_URL: postgres://postgres:postgres@localhost:5432/focus_forge_test
+        run: bundle exec rspec
