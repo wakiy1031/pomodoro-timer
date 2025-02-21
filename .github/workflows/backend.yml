@@ -34,38 +34,48 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Debug directory contents
+      - name: Debug directory structure
         run: |
-          echo "Current directory:"
+          echo "Current working directory:"
           pwd
-          echo "Workspace directory contents:"
-          ls -la ${{ github.workspace }}
-          echo "Backend directory contents:"
-          ls -la ${{ github.workspace }}/backend
+          echo "List workspace root:"
+          ls -la
+          echo "List .github directory:"
+          ls -la .github
+          echo "List backend directory:"
+          ls -la backend
+          echo "Check Gemfile existence:"
+          test -f backend/Gemfile && echo "Gemfile exists" || echo "Gemfile not found"
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: "3.2.2"
-          bundler-cache: true
-          working-directory: ${{ github.workspace }}/backend
+          working-directory: backend
+
+      - name: Bundle install
+        run: |
+          cd backend
+          bundle install
 
       - name: Generate RSpec files
-        working-directory: ${{ github.workspace }}/backend
-        env:
-          RAILS_ENV: test
-        run: bundle exec rails generate rspec:install
+        run: |
+          cd backend
+          bundle exec rails generate rspec:install
 
       - name: Setup test database
-        working-directory: ${{ github.workspace }}/backend
-        env:
-          RAILS_ENV: test
         run: |
+          cd backend
           cp config/database.yml.ci config/database.yml
           bundle exec rails db:create db:schema:load
-
-      - name: Run tests
-        working-directory: ${{ github.workspace }}/backend
         env:
           RAILS_ENV: test
-        run: bundle exec rspec
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/focus_forge_test
+
+      - name: Run tests
+        run: |
+          cd backend
+          bundle exec rspec
+        env:
+          RAILS_ENV: test
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/focus_forge_test
