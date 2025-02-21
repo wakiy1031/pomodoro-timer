@@ -24,46 +24,38 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Debug directory structure
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Debug environment
         run: |
+          echo "Node version:"
+          node --version
+          echo "NPM version:"
+          npm --version
           echo "Current working directory:"
           pwd
           echo "Directory contents:"
           ls -la
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-          cache: "npm"
-          cache-dependency-path: frontend/package-lock.json
-
-      - name: Clean install dependencies
+      - name: Install dependencies
         run: |
-          rm -rf node_modules
-          rm -f package-lock.json
+          echo "Installing dependencies..."
           npm install
-
-      - name: Verify next installation
-        run: |
-          echo "Checking next binary:"
-          ls -la node_modules/.bin/next || echo "next binary not found"
-          echo "Package contents:"
-          cat package.json
           echo "Installed packages:"
-          npm list --depth=0
+          npm list
+          echo "Checking next binary:"
+          ls -la node_modules/.bin/next
+          echo "Checking next version:"
+          ./node_modules/.bin/next --version
 
       - name: Run lint
-        run: |
-          export PATH="$PATH:$(pwd)/node_modules/.bin"
-          npm run lint
+        run: ./node_modules/.bin/next lint
 
       - name: Run type check
-        run: |
-          export PATH="$PATH:$(pwd)/node_modules/.bin"
-          npm run type-check
+        run: npm run type-check
 
       - name: Build
-        run: |
-          export PATH="$PATH:$(pwd)/node_modules/.bin"
-          npm run build
+        run: ./node_modules/.bin/next build
