@@ -10,8 +10,21 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 0) do
+ActiveRecord::Schema[8.0].define(version: 2025_02_23_002749) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
+  create_table "timer_sessions", force: :cascade do |t|
+    t.bigint "user_id"
+    t.datetime "started_at", null: false
+    t.datetime "ended_at"
+    t.integer "focus_duration", default: 1500, null: false
+    t.integer "break_duration", default: 300, null: false
+    t.integer "completed_cycles", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "status", default: 0
+    t.index ["started_at"], name: "index_timer_sessions_on_started_at"
+    t.index ["user_id"], name: "index_timer_sessions_on_user_id"
+  end
 end
