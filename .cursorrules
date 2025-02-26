@@ -111,8 +111,7 @@
 - Next.js（App Router）
 - TypeScript
 - TailwindCSS
-- Zustand（状態管理）
-- Jest + React Testing Library
+- Jotai（状態管理）
 
 ## バックエンド
 - Ruby on Rails 8（APIモード）
