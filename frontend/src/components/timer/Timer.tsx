@@ -74,7 +74,7 @@ const Timer = () => {
         </Box>
       )}
 
-      <Box className="flex space-x-4">
+      <Box className="flex space-x-4 flex-wrap justify-center gap-y-3">
         <Button
           onClick={session.status === "in_progress" ? pauseTimer : startTimer}
           borderRadius="10px"
