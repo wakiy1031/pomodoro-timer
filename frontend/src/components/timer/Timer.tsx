@@ -93,9 +93,11 @@ const Timer = () => {
             </>
           )}
         </Button>
-        <Button onClick={resetTimer} borderRadius="10px" size="lg">
-          リセット
-        </Button>
+        {!session.isBreak && (
+          <Button onClick={resetTimer} borderRadius="10px" size="lg">
+            リセット
+          </Button>
+        )}
         {session.isBreak && (
           <Button
             onClick={skipBreak}
