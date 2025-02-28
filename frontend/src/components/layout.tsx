@@ -4,6 +4,7 @@ import type React from "react";
 import { Button, is, List, ListItem, Switch } from "@yamada-ui/react";
 import { useTheme } from "@/hooks/useTheme";
 import { Sun, Moon, Timer, Settings } from "lucide-react";
+import Link from "next/link";
 
 const Sidebar = () => {
   const { isDarkMode, toggleTheme } = useTheme();
@@ -16,7 +17,6 @@ const Sidebar = () => {
             <div className="w-12 h-12 rounded-full bg-gray-700"></div>
             <div>
               <h2 className="font-bold">Wakiy</h2>
-              <p className="text-sm text-gray-400"></p>
             </div>
           </div>
         </div>
@@ -24,31 +24,35 @@ const Sidebar = () => {
       <nav className="flex-1">
         <List className="space-y-2" gap={4}>
           <ListItem>
-            <Button
-              w="full"
-              justifyContent="start"
-              color="white"
-              bg="none"
-              _hover={{ color: "gray.900", bg: "white" }}
-            >
-              <Timer className="mr-2" />
-              タイマー
-            </Button>
+            <Link href="/" className="w-full">
+              <Button
+                w="full"
+                justifyContent="start"
+                color="white"
+                bg="none"
+                _hover={{ color: "gray.900", bg: "white" }}
+              >
+                <Timer className="mr-2" />
+                タイマー
+              </Button>
+            </Link>
           </ListItem>
           {/* <ListItem>
             <Button className="w-full justify-start">統計</Button>
           </ListItem> */}
           <ListItem>
-            <Button
-              w="full"
-              justifyContent="start"
-              color="white"
-              bg="none"
-              _hover={{ color: "gray.900", bg: "white" }}
-            >
-              <Settings className="mr-2" />
-              設定
-            </Button>
+            <Link href="/settings" className="w-full">
+              <Button
+                w="full"
+                justifyContent="start"
+                color="white"
+                bg="none"
+                _hover={{ color: "gray.900", bg: "white" }}
+              >
+                <Settings className="mr-2" />
+                設定
+              </Button>
+            </Link>
           </ListItem>
         </List>
       </nav>
