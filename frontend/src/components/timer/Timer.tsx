@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, Button, Text, Badge } from "@yamada-ui/react";
+import { Box, Button, Text, Badge, CircleProgress } from "@yamada-ui/react";
 import {
   PlayIcon,
   PauseIcon,
@@ -10,12 +10,13 @@ import {
 } from "lucide-react";
 import { useTimer } from "@/hooks/useTimer";
 import { useAtom } from "jotai";
-import { timerSettingsAtom } from "@/store/timerAtoms";
+import { timerSettingsAtom, timerProgressAtom } from "@/store/timerAtoms";
 
 const Timer = () => {
   const { session, startTimer, pauseTimer, resetTimer, skipBreak, formatTime } =
     useTimer();
   const [settings] = useAtom(timerSettingsAtom);
+  const [progress] = useAtom(timerProgressAtom);
 
   // 現在のタイマー時間と設定時間が異なるかどうかを確認
   const isCustomized =
@@ -25,21 +26,26 @@ const Timer = () => {
       session.focusDuration !== settings.defaultFocusDuration);
 
   // 休憩中かどうかに基づいてスタイルを変更
-  const timerBorderColor = session.isBreak ? "teal.400" : "primary";
-  const timerBgColor = session.isBreak ? "teal.50" : "transparent";
-  const timerTextColor = session.isBreak ? "teal.700" : "inherit";
+  const timerColor = session.isBreak ? "teal" : "primary";
+  const progressColor = session.isBreak ? "teal.400" : "primary";
+  const textColor = session.isBreak ? "teal.700" : "inherit";
 
   return (
     <Box className="flex flex-col items-center">
-      <Box
-        className={`w-64 h-64 rounded-full border-4 flex items-center justify-center mb-8 relative ${
-          session.isBreak ? "animate-pulse" : ""
-        }`}
-        borderColor={timerBorderColor}
-        bg={timerBgColor}
-      >
-        <Box className="flex flex-col items-center">
-          <Text className="text-6xl font-bold" color={timerTextColor}>
+      <Box className="relative w-64 h-64 flex items-center justify-center mb-8">
+        <CircleProgress
+          value={progress}
+          thickness="4px"
+          color={progressColor}
+          trackColor="gray.100"
+          className="absolute inset-0"
+          boxSize={72}
+        />
+        <Box
+          className="flex flex-col items-center justify-center z-10"
+          position="absolute"
+        >
+          <Text className="text-5xl font-bold" color={textColor}>
             {formatTime(session.remainingTime)}
           </Text>
         </Box>
@@ -55,13 +61,15 @@ const Timer = () => {
 
       {session.isBreak && (
         <Box
-          className="mb-4 p-3 rounded-lg bg-teal-100 border border-teal-300 flex items-center"
+          className="mb-4 p-3 rounded-lg border flex items-center"
           width="fit-content"
           maxW="md"
+          bg="teal.100"
+          borderColor="teal.300"
         >
           <CoffeeIcon size={24} className="mr-2 text-teal-600" />
           <Text fontSize="lg" fontWeight="bold" color="teal.700">
-            休憩中です
+            休憩中
           </Text>
         </Box>
       )}

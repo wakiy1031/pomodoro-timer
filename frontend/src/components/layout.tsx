@@ -11,16 +11,7 @@ const Sidebar = () => {
 
   return (
     <aside className="w-64 bg-gray-900 text-white p-4 flex flex-col h-screen">
-      <div className="mb-8">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <div className="w-12 h-12 rounded-full bg-gray-700"></div>
-            <div>
-              <h2 className="font-bold">Wakiy</h2>
-            </div>
-          </div>
-        </div>
-      </div>
+      <div className="mb-8"></div>
       <nav className="flex-1">
         <List className="space-y-2" gap={4}>
           <ListItem>
