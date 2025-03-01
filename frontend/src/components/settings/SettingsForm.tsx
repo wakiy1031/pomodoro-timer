@@ -25,7 +25,7 @@ const SettingsForm = () => {
   const [session] = useAtom(timerSessionAtom);
   const [focusMinutes, setFocusMinutes] = useState("");
   const [breakMinutes, setBreakMinutes] = useState("");
-  const [mounted, setMounted] = useState(false);
+  const [mounted, setMounted] = useState(true);
   const notice = useNotice();
 
   // 初期値をセット
@@ -33,14 +33,6 @@ const SettingsForm = () => {
     setFocusMinutes(String(Math.floor(settings.defaultFocusDuration / 60)));
     setBreakMinutes(String(Math.floor(settings.defaultBreakDuration / 60)));
   }, [settings]);
-
-  // マウント時のアニメーション用
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setMounted(true);
-    }, 200);
-    return () => clearTimeout(timer);
-  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -92,15 +84,7 @@ const SettingsForm = () => {
     session.status === "in_progress" || session.status === "paused";
 
   return (
-    <Box
-      p={6}
-      w="full"
-      borderRadius="md"
-      className={`transition-all duration-500 ${
-        mounted ? "opacity-100 transform-none" : "opacity-0 translate-y-4"
-      }`}
-      style={{ willChange: "opacity, transform" }}
-    >
+    <Box p={6} w="full" borderRadius="md">
       <VStack gap={6}>
         <Heading size="md">タイマー設定</Heading>
         <Text>作業時間と休憩時間をカスタマイズできます</Text>

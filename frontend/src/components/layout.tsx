@@ -14,6 +14,7 @@ import {
   DrawerBody,
   DrawerOverlay,
   DrawerCloseButton,
+  Tooltip,
 } from "@yamada-ui/react";
 import { useTheme } from "@/hooks/useTheme";
 import { Sun, Moon, Timer, Settings, Menu } from "lucide-react";
@@ -61,30 +62,37 @@ const SidebarContent = () => {
           </ListItem>
         </List>
       </nav>
-      <div className="flex items-center justify-between relative w-fit mb-4">
-        <Switch
-          checked={!isDarkMode}
-          onChange={toggleTheme}
-          size="lg"
-          border="2px solid"
-          borderColor="white"
-          borderRadius="full"
-          colorScheme="white"
-        />
-        <div className="absolute flex items-center justify-center pointer-events-none z-1 w-full h-full -translate-y-1/2 top-1/2">
-          {isDarkMode ? (
-            <Moon
-              size={15}
-              className="text-white absolute right-2 -translate-y-1/2 top-1/2"
-            />
-          ) : (
-            <Sun
-              size={15}
-              className="text-white absolute left-2 -translate-y-1/2 top-1/2"
-            />
-          )}
+      <Tooltip
+        label={isDarkMode ? "ライトモードに切り替え" : "ダークモードに切り替え"}
+      >
+        <div className="flex items-center justify-between relative w-fit mb-4">
+          <Switch
+            checked={!isDarkMode}
+            onChange={toggleTheme}
+            size="lg"
+            border="2px solid"
+            borderColor="white"
+            borderRadius="full"
+            colorScheme="white"
+            aria-label={
+              isDarkMode ? "ライトモードに切り替え" : "ダークモードに切り替え"
+            }
+          />
+          <div className="absolute flex items-center justify-center pointer-events-none z-1 w-full h-full -translate-y-1/2 top-1/2">
+            {isDarkMode ? (
+              <Moon
+                size={15}
+                className="text-white absolute right-2 -translate-y-1/2 top-1/2"
+              />
+            ) : (
+              <Sun
+                size={15}
+                className="text-white absolute left-2 -translate-y-1/2 top-1/2"
+              />
+            )}
+          </div>
         </div>
-      </div>
+      </Tooltip>
     </>
   );
 };
@@ -135,14 +143,12 @@ const MobileDrawer = ({ isVisible }: { isVisible: boolean }) => {
 };
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
-  const { isDarkMode } = useTheme();
+  const { isDarkMode, isInitialized } = useTheme();
 
   // hydrationの不一致を防ぐためのステート
   const [isClient, setIsClient] = useState(false);
   // メディアクエリの結果を保持するステート
   const [isDesktop, setIsDesktop] = useState(true); // デフォルトでデスクトップとして初期化
-  // コンテンツの読み込み状態を管理
-  const [contentReady, setContentReady] = useState(false);
   // レイアウトが安定したかどうかを追跡
   const [layoutStable, setLayoutStable] = useState(false);
   // 初期レンダリングを追跡
@@ -152,11 +158,6 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     setIsClient(true);
 
-    // コンテンツの読み込み完了を少し遅延させてトランジションを滑らかにする
-    const contentTimer = setTimeout(() => {
-      setContentReady(true);
-    }, 150);
-
     // レイアウトの安定化をさらに遅延させる
     const layoutTimer = setTimeout(() => {
       setLayoutStable(true);
@@ -164,7 +165,6 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
     }, 300);
 
     return () => {
-      clearTimeout(contentTimer);
       clearTimeout(layoutTimer);
     };
   }, []);
@@ -197,7 +197,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   }, [isClient]);
 
   // 初期レンダリング時のスケルトン表示
-  if (!isClient) {
+  if (!isClient || !isInitialized) {
     return (
       <div className="min-h-screen bg-white dark:bg-gray-800 flex items-center justify-center">
         <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
@@ -205,16 +205,11 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
     );
   }
 
-  // レイアウトの骨組みを常に表示し、コンテンツだけをフェードイン
   return (
     <div className={`min-h-screen ${isDarkMode ? "dark" : ""}`}>
       <div className="flex h-dvh">
         {/* サイドバーは常に同じ位置に表示（表示/非表示の切り替えのみ） */}
-        <div
-          className={`${
-            isDesktop ? "block" : "hidden"
-          } w-64 transition-transform duration-300`}
-        >
+        <div className={`${isDesktop ? "block" : "hidden"} w-64`}>
           <Sidebar />
         </div>
 
@@ -222,13 +217,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
         <MobileDrawer isVisible={isClient && !isDesktop && layoutStable} />
 
         {/* メインコンテンツ領域 */}
-        <main
-          className={`flex-1 p-8 h-dvh bg-white dark:bg-gray-800 text-gray-900 dark:text-white transition-all duration-500 ${
-            contentReady
-              ? "opacity-100 transform-none"
-              : "opacity-0 translate-y-4"
-          }`}
-        >
+        <main className="flex-1 p-8 h-dvh bg-white dark:bg-gray-800 text-gray-900 dark:text-white transition-colors duration-200">
           {children}
         </main>
       </div>

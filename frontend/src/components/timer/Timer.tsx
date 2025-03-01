@@ -12,15 +12,7 @@ const Timer = () => {
     useTimer();
   const [settings] = useAtom(timerSettingsAtom);
   const [progress] = useAtom(timerProgressAtom);
-  const [mounted, setMounted] = useState(false);
-
-  // マウント時のアニメーション用
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setMounted(true);
-    }, 200);
-    return () => clearTimeout(timer);
-  }, []);
+  const [mounted, setMounted] = useState(true);
 
   // 現在のタイマー時間と設定時間が異なるかどうかを確認
   const isCustomized =
@@ -40,21 +32,12 @@ const Timer = () => {
       session.status === "completed" &&
       typeof window !== "undefined"
     ) {
-      // 少し遅延を入れて、状態の更新が確実に反映されるようにする
-      const timer = setTimeout(() => {
-        startTimer();
-      }, 100);
-      return () => clearTimeout(timer);
+      startTimer();
     }
   }, [session.isBreak, session.status, startTimer]);
 
   return (
-    <Box
-      className={`flex flex-col items-center transition-all duration-500 ${
-        mounted ? "opacity-100 transform-none" : "opacity-0 translate-y-4"
-      }`}
-      style={{ willChange: "opacity, transform" }}
-    >
+    <Box className="flex flex-col items-center">
       <Box className="relative w-64 h-64 flex items-center justify-center mb-8">
         <CircleProgress
           value={progress}

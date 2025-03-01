@@ -24,25 +24,11 @@ const TimerClient = dynamic(() => import("@/components/timer/Timer"), {
 });
 
 export default function Home() {
-  const [mounted, setMounted] = useState(false);
-
-  // マウント時のアニメーション用
-  useEffect(() => {
-    // ページ遷移時のちらつきを防ぐため、少し遅延させる
-    const timer = setTimeout(() => {
-      setMounted(true);
-    }, 300);
-    return () => clearTimeout(timer);
-  }, []);
+  const [mounted, setMounted] = useState(true);
 
   return (
     <Layout>
-      <div
-        className={`relative flex justify-center items-center h-full transition-all duration-500 ${
-          mounted ? "opacity-100 transform-none" : "opacity-0 translate-y-4"
-        }`}
-        style={{ willChange: "opacity, transform" }}
-      >
+      <div className="relative flex justify-center items-center h-full">
         <div className="flex flex-col items-center justify-center h-[calc(100vh-12rem)] md:h-[calc(100vh-12rem)]">
           <TimerClient />
         </div>
