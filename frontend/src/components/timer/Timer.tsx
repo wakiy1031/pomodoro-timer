@@ -5,12 +5,22 @@ import { PlayIcon, PauseIcon, InfoIcon, CoffeeIcon } from "lucide-react";
 import { useTimer } from "@/hooks/useTimer";
 import { useAtom } from "jotai";
 import { timerSettingsAtom, timerProgressAtom } from "@/store/timerAtoms";
+import { useEffect, useState } from "react";
 
 const Timer = () => {
   const { session, startTimer, pauseTimer, resetTimer, skipBreak, formatTime } =
     useTimer();
   const [settings] = useAtom(timerSettingsAtom);
   const [progress] = useAtom(timerProgressAtom);
+  const [mounted, setMounted] = useState(false);
+
+  // マウント時のアニメーション用
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setMounted(true);
+    }, 200);
+    return () => clearTimeout(timer);
+  }, []);
 
   // 現在のタイマー時間と設定時間が異なるかどうかを確認
   const isCustomized =
@@ -23,8 +33,28 @@ const Timer = () => {
   const progressColor = session.isBreak ? "teal.400" : "primary";
   const textColor = session.isBreak ? "teal.700" : "inherit";
 
+  // 休憩モードの状態を確認し、必要に応じて自動的に開始
+  useEffect(() => {
+    if (
+      session.isBreak &&
+      session.status === "completed" &&
+      typeof window !== "undefined"
+    ) {
+      // 少し遅延を入れて、状態の更新が確実に反映されるようにする
+      const timer = setTimeout(() => {
+        startTimer();
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [session.isBreak, session.status, startTimer]);
+
   return (
-    <Box className="flex flex-col items-center">
+    <Box
+      className={`flex flex-col items-center transition-all duration-500 ${
+        mounted ? "opacity-100 transform-none" : "opacity-0 translate-y-4"
+      }`}
+      style={{ willChange: "opacity, transform" }}
+    >
       <Box className="relative w-64 h-64 flex items-center justify-center mb-8">
         <CircleProgress
           value={progress}
