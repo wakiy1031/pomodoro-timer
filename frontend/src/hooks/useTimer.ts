@@ -4,8 +4,7 @@ import {
   timerIntervalIdAtom,
   timerSettingsAtom,
 } from "../store/timerAtoms";
-import { TimerSession, TimerSettings } from "../types/timer";
-import { useEffect } from "react";
+import { useEffect, useCallback } from "react";
 
 export const useTimer = () => {
   const [session, setSession] = useAtom(timerSessionAtom);
@@ -16,8 +15,6 @@ export const useTimer = () => {
   useEffect(() => {
     // 設定が変更されたら、現在のセッションの時間設定を更新
     setSession((prev) => {
-      // 現在のステータスを保持
-      const currentStatus = prev.status;
       const isBreak = prev.isBreak;
 
       // 残り時間の割合を計算（例: 25分中の15分 = 60%）
@@ -46,13 +43,42 @@ export const useTimer = () => {
     });
   }, [settings, setSession]);
 
+  // 休憩タイマーを自動的に開始する関数
+  const startBreakTimer = useCallback(() => {
+    setSession((prev) => ({
+      ...prev,
+      status: "in_progress",
+    }));
+
+    const id = window.setInterval(() => {
+      setSession((prev) => {
+        if (prev.remainingTime <= 0) {
+          // 休憩タイマー終了時の処理
+          clearInterval(id);
+          return {
+            ...prev,
+            status: "initial",
+            isBreak: false,
+            remainingTime: prev.focusDuration,
+          };
+        }
+        return {
+          ...prev,
+          remainingTime: prev.remainingTime - 1,
+        };
+      });
+    }, 1000);
+
+    setIntervalId(id);
+  }, [setSession, setIntervalId]);
+
   // タイマーの状態が変わったときに自動的に休憩タイマーを開始
   useEffect(() => {
     // 作業時間が終了して休憩モードになった場合、自動的に休憩タイマーを開始
     if (session.status === "completed" && session.isBreak) {
       startBreakTimer();
     }
-  }, [session.status, session.isBreak]);
+  }, [session.status, session.isBreak, startBreakTimer]);
 
   const startTimer = () => {
     if (session.status !== "initial" && session.status !== "paused") return;
@@ -85,35 +111,6 @@ export const useTimer = () => {
               remainingTime: prev.breakDuration,
             };
           }
-        }
-        return {
-          ...prev,
-          remainingTime: prev.remainingTime - 1,
-        };
-      });
-    }, 1000);
-
-    setIntervalId(id);
-  };
-
-  // 休憩タイマーを自動的に開始する関数
-  const startBreakTimer = () => {
-    setSession((prev) => ({
-      ...prev,
-      status: "in_progress",
-    }));
-
-    const id = window.setInterval(() => {
-      setSession((prev) => {
-        if (prev.remainingTime <= 0) {
-          // 休憩タイマー終了時の処理
-          clearInterval(id);
-          return {
-            ...prev,
-            status: "initial",
-            isBreak: false,
-            remainingTime: prev.focusDuration,
-          };
         }
         return {
           ...prev,

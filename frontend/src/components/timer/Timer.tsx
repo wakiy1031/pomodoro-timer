@@ -1,13 +1,7 @@
 "use client";
 
 import { Box, Button, Text, Badge, CircleProgress } from "@yamada-ui/react";
-import {
-  PlayIcon,
-  PauseIcon,
-  InfoIcon,
-  CoffeeIcon,
-  TimerIcon,
-} from "lucide-react";
+import { PlayIcon, PauseIcon, InfoIcon, CoffeeIcon } from "lucide-react";
 import { useTimer } from "@/hooks/useTimer";
 import { useAtom } from "jotai";
 import { timerSettingsAtom, timerProgressAtom } from "@/store/timerAtoms";
@@ -26,7 +20,6 @@ const Timer = () => {
       session.focusDuration !== settings.defaultFocusDuration);
 
   // 休憩中かどうかに基づいてスタイルを変更
-  const timerColor = session.isBreak ? "teal" : "primary";
   const progressColor = session.isBreak ? "teal.400" : "primary";
   const textColor = session.isBreak ? "teal.700" : "inherit";
 
