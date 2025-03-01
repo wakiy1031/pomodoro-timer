@@ -27,9 +27,9 @@ const SidebarContent = () => {
   return (
     <>
       <div className="mb-8"></div>
-      <nav className="flex-1">
-        <List className="space-y-2" gap={4}>
-          <ListItem>
+      <nav className="flex-1 w-fit">
+        <List className="space-y-2 w-full" gap={4}>
+          <ListItem className="w-fit">
             <Link href="/" className="w-full">
               <Button
                 w="full"
@@ -46,7 +46,7 @@ const SidebarContent = () => {
           {/* <ListItem>
             <Button className="w-full justify-start">統計</Button>
           </ListItem> */}
-          <ListItem>
+          <ListItem className="w-full">
             <Link href="/settings" className="w-full">
               <Button
                 w="full"
@@ -60,39 +60,45 @@ const SidebarContent = () => {
               </Button>
             </Link>
           </ListItem>
+          <ListItem>
+            <Tooltip
+              label={
+                isDarkMode ? "ライトモードに切り替え" : "ダークモードに切り替え"
+              }
+            >
+              <div className="flex items-center justify-between relative w-fit ml-3">
+                <Switch
+                  checked={!isDarkMode}
+                  onChange={toggleTheme}
+                  size="lg"
+                  border="2px solid"
+                  borderColor="white"
+                  borderRadius="full"
+                  colorScheme="white"
+                  aria-label={
+                    isDarkMode
+                      ? "ライトモードに切り替え"
+                      : "ダークモードに切り替え"
+                  }
+                />
+                <div className="absolute flex items-center justify-center pointer-events-none z-1 w-full h-full -translate-y-1/2 top-1/2">
+                  {isDarkMode ? (
+                    <Moon
+                      size={15}
+                      className="text-white absolute right-2 -translate-y-1/2 top-1/2"
+                    />
+                  ) : (
+                    <Sun
+                      size={15}
+                      className="text-white absolute left-2 -translate-y-1/2 top-1/2"
+                    />
+                  )}
+                </div>
+              </div>
+            </Tooltip>
+          </ListItem>
         </List>
       </nav>
-      <Tooltip
-        label={isDarkMode ? "ライトモードに切り替え" : "ダークモードに切り替え"}
-      >
-        <div className="flex items-center justify-between relative w-fit mb-4">
-          <Switch
-            checked={!isDarkMode}
-            onChange={toggleTheme}
-            size="lg"
-            border="2px solid"
-            borderColor="white"
-            borderRadius="full"
-            colorScheme="white"
-            aria-label={
-              isDarkMode ? "ライトモードに切り替え" : "ダークモードに切り替え"
-            }
-          />
-          <div className="absolute flex items-center justify-center pointer-events-none z-1 w-full h-full -translate-y-1/2 top-1/2">
-            {isDarkMode ? (
-              <Moon
-                size={15}
-                className="text-white absolute right-2 -translate-y-1/2 top-1/2"
-              />
-            ) : (
-              <Sun
-                size={15}
-                className="text-white absolute left-2 -translate-y-1/2 top-1/2"
-              />
-            )}
-          </div>
-        </div>
-      </Tooltip>
     </>
   );
 };

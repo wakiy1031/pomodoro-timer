@@ -101,7 +101,7 @@ const SettingsForm = () => {
           </Alert>
         )}
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="w-full max-w-md">
           <VStack gap={4} alignItems="stretch">
             <FormControl>
               <Text fontWeight="bold" mb={2}>

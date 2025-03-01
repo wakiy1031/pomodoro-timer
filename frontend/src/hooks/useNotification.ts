@@ -118,8 +118,6 @@ export const useNotification = () => {
       if (swRegistration) {
         await swRegistration.showNotification(options.title, {
           body: options.body,
-          icon: options.icon || "/notification-icon.png",
-          badge: options.badge || "/notification-badge.png",
           data: options.data,
         });
         return true;
@@ -127,8 +125,6 @@ export const useNotification = () => {
         // フォールバック: 通常の通知API
         new Notification(options.title, {
           body: options.body,
-          icon: options.icon || "/notification-icon.png",
-          badge: options.badge || "/notification-badge.png",
         });
         return true;
       }
