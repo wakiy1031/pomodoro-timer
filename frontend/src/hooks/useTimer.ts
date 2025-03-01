@@ -45,12 +45,16 @@ export const useTimer = () => {
 
   // 休憩タイマーを自動的に開始する関数
   const startBreakTimer = useCallback(() => {
+    // サーバーサイドレンダリング時は何もしない
+    if (typeof window === "undefined") return;
+
     setSession((prev) => ({
       ...prev,
       status: "in_progress",
     }));
 
-    const id = window.setInterval(() => {
+    // setIntervalの戻り値をnumberとして扱う
+    const id = setInterval(() => {
       setSession((prev) => {
         if (prev.remainingTime <= 0) {
           // 休憩タイマー終了時の処理
@@ -67,13 +71,16 @@ export const useTimer = () => {
           remainingTime: prev.remainingTime - 1,
         };
       });
-    }, 1000);
+    }, 1000) as unknown as number;
 
     setIntervalId(id);
   }, [setSession, setIntervalId]);
 
   // タイマーの状態が変わったときに自動的に休憩タイマーを開始
   useEffect(() => {
+    // サーバーサイドレンダリング時は何もしない
+    if (typeof window === "undefined") return;
+
     // 作業時間が終了して休憩モードになった場合、自動的に休憩タイマーを開始
     if (session.status === "completed" && session.isBreak) {
       startBreakTimer();
@@ -81,6 +88,9 @@ export const useTimer = () => {
   }, [session.status, session.isBreak, startBreakTimer]);
 
   const startTimer = () => {
+    // サーバーサイドレンダリング時は何もしない
+    if (typeof window === "undefined") return;
+
     if (session.status !== "initial" && session.status !== "paused") return;
 
     setSession((prev) => ({
@@ -89,7 +99,8 @@ export const useTimer = () => {
       startedAt: prev.startedAt || new Date(),
     }));
 
-    const id = window.setInterval(() => {
+    // setIntervalの戻り値をnumberとして扱う
+    const id = setInterval(() => {
       setSession((prev) => {
         if (prev.remainingTime <= 0) {
           // タイマー終了時の処理
@@ -117,12 +128,15 @@ export const useTimer = () => {
           remainingTime: prev.remainingTime - 1,
         };
       });
-    }, 1000);
+    }, 1000) as unknown as number;
 
     setIntervalId(id);
   };
 
   const pauseTimer = () => {
+    // サーバーサイドレンダリング時は何もしない
+    if (typeof window === "undefined") return;
+
     if (session.status !== "in_progress") return;
 
     if (intervalId) {
@@ -137,6 +151,9 @@ export const useTimer = () => {
   };
 
   const resetTimer = () => {
+    // サーバーサイドレンダリング時は何もしない
+    if (typeof window === "undefined") return;
+
     if (intervalId) {
       clearInterval(intervalId);
       setIntervalId(null);
@@ -153,6 +170,9 @@ export const useTimer = () => {
   };
 
   const skipBreak = () => {
+    // サーバーサイドレンダリング時は何もしない
+    if (typeof window === "undefined") return;
+
     if (!session.isBreak) return;
 
     if (intervalId) {

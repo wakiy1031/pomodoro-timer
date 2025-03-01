@@ -1,18 +1,24 @@
 import Layout from "@/components/layout";
-import SettingsForm from "@/components/settings/SettingsForm";
-import { Heading, UIProvider } from "@yamada-ui/react";
+import { Heading } from "@yamada-ui/react";
+import dynamic from "next/dynamic";
+
+// クライアントサイドでのみレンダリングされるSettingsFormコンポーネント
+const SettingsFormClient = dynamic(
+  () => import("@/components/settings/SettingsForm"),
+  {
+    ssr: false,
+  }
+);
 
 export default function Settings() {
   return (
-    <UIProvider>
-      <Layout>
-        <div className="relative h-full">
-          <Heading size="lg">設定</Heading>
-          <div className="flex flex-col h-[calc(100vh-12rem)]">
-            <SettingsForm />
-          </div>
+    <Layout>
+      <div className="relative h-full">
+        <Heading size="lg">設定</Heading>
+        <div className="flex flex-col h-[calc(100vh-12rem)]">
+          <SettingsFormClient />
         </div>
-      </Layout>
-    </UIProvider>
+      </div>
+    </Layout>
   );
 }
