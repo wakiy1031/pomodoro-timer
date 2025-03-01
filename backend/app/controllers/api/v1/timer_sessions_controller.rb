@@ -15,7 +15,7 @@ module Api
         timer_session = TimerSession.find(params[:id])
         render json: timer_session, status: :ok
       rescue ActiveRecord::RecordNotFound
-        render json: { error: 'Timer session not found' }, status: :not_found
+        render json: { error: "Timer session not found" }, status: :not_found
       end
       private
 
