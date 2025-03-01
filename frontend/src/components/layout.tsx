@@ -159,7 +159,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   const { isDarkMode } = useTheme();
 
   // カスタムフックを使用して画面サイズを検出
-  const isMobile = useMediaQuery("(max-width: 1024px)");
+  const isMobile = useMediaQuery("(min-width: 1024px)");
 
   return (
     <div className={`min-h-screen ${isDarkMode ? "dark" : ""}`}>
