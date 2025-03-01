@@ -1,3 +1,5 @@
+"use client";
+
 import Layout from "@/components/layout";
 import { Heading } from "@yamada-ui/react";
 import dynamic from "next/dynamic";

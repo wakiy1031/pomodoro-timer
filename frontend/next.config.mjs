@@ -2,9 +2,11 @@
 const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
-  output: "standalone",
-  experimental: {
-    appDir: true,
+  // サーバーサイドレンダリングのみを使用する
+  output: "export",
+  // 静的生成時にwindowオブジェクトを使用するコンポーネントをスキップする
+  images: {
+    unoptimized: true,
   },
 };
 
