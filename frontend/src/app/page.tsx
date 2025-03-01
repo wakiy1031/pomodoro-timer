@@ -1,7 +1,11 @@
 "use client";
 
-import Layout from "@/components/layout";
 import dynamic from "next/dynamic";
+
+// クライアントサイドでのみレンダリングされるコンポーネント
+const Layout = dynamic(() => import("@/components/layout"), {
+  ssr: false,
+});
 
 // クライアントサイドでのみレンダリングされるTimerコンポーネント
 const TimerClient = dynamic(() => import("@/components/timer/Timer"), {

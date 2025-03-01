@@ -1,8 +1,12 @@
 "use client";
 
-import Layout from "@/components/layout";
-import { Heading } from "@yamada-ui/react";
 import dynamic from "next/dynamic";
+import { Heading } from "@yamada-ui/react";
+
+// クライアントサイドでのみレンダリングされるコンポーネント
+const Layout = dynamic(() => import("@/components/layout"), {
+  ssr: false,
+});
 
 // クライアントサイドでのみレンダリングされるSettingsFormコンポーネント
 const SettingsFormClient = dynamic(

@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import type React from "react";
 import {
   Button,
@@ -9,7 +10,6 @@ import {
   useDisclosure,
   Box,
   IconButton,
-  useBreakpointValue,
   Drawer,
   DrawerBody,
   DrawerOverlay,
@@ -131,15 +131,41 @@ const MobileDrawer = () => {
   );
 };
 
+// メディアクエリを使用して画面サイズを検出するカスタムフック
+const useMediaQuery = (query: string) => {
+  const [matches, setMatches] = useState(false);
+
+  useEffect(() => {
+    // サーバーサイドレンダリング時は何もしない
+    if (typeof window === "undefined") return;
+
+    const media = window.matchMedia(query);
+    const listener = () => setMatches(media.matches);
+
+    // 初期値を設定
+    setMatches(media.matches);
+
+    // リスナーを追加
+    media.addEventListener("change", listener);
+
+    // クリーンアップ
+    return () => media.removeEventListener("change", listener);
+  }, [query]);
+
+  return matches;
+};
+
 const Layout = ({ children }: { children: React.ReactNode }) => {
   const { isDarkMode } = useTheme();
-  const isMobile = useBreakpointValue({ base: false, lg: true });
+
+  // カスタムフックを使用して画面サイズを検出
+  const isMobile = useMediaQuery("(max-width: 1024px)");
 
   return (
     <div className={`min-h-screen ${isDarkMode ? "dark" : ""}`}>
       <div className="flex h-dvh">
-        {!isMobile && <Sidebar />}
-        {isMobile && <MobileDrawer />}
+        {isMobile && <Sidebar />}
+        {!isMobile && <MobileDrawer />}
         <main
           className={`flex-1 p-8 h-dvh bg-white dark:bg-gray-800 text-gray-900 dark:text-white ${
             isMobile ? "w-full" : ""
