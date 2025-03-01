@@ -7,11 +7,13 @@ import {
   timerSettingsAtom,
 } from "../store/timerAtoms";
 import { useEffect, useCallback } from "react";
+import { useNotification } from "./useNotification";
 
 export const useTimer = () => {
   const [session, setSession] = useAtom(timerSessionAtom);
   const [intervalId, setIntervalId] = useAtom(timerIntervalIdAtom);
   const [settings] = useAtom(timerSettingsAtom);
+  const { showNotification } = useNotification();
 
   // 設定変更を監視して、タイマーセッションを更新
   useEffect(() => {
@@ -50,9 +52,11 @@ export const useTimer = () => {
     // サーバーサイドレンダリング時は何もしない
     if (typeof window === "undefined") return;
 
+    // 休憩タイマーの開始時に、残り時間を休憩時間の設定値に確実に設定
     setSession((prev) => ({
       ...prev,
       status: "in_progress",
+      remainingTime: prev.breakDuration, // 確実に休憩時間の設定値を使用
     }));
 
     // setIntervalの戻り値をnumberとして扱う
@@ -61,6 +65,15 @@ export const useTimer = () => {
         if (prev.remainingTime <= 0) {
           // 休憩タイマー終了時の処理
           clearInterval(id);
+
+          // 休憩終了時に通知を表示
+          if (typeof window !== "undefined") {
+            showNotification({
+              title: "休憩終了",
+              body: "休憩時間が終了しました。新しい作業セッションを開始しましょう！",
+            });
+          }
+
           return {
             ...prev,
             status: "initial",
@@ -76,7 +89,7 @@ export const useTimer = () => {
     }, 1000) as unknown as number;
 
     setIntervalId(id);
-  }, [setSession, setIntervalId]);
+  }, [setSession, setIntervalId, showNotification]);
 
   // タイマーの状態が変わったときに自動的に休憩タイマーを開始
   useEffect(() => {
@@ -109,6 +122,15 @@ export const useTimer = () => {
           clearInterval(id);
           if (prev.isBreak) {
             // 休憩終了時
+
+            // 休憩終了時に通知を表示
+            if (typeof window !== "undefined") {
+              showNotification({
+                title: "休憩終了",
+                body: "休憩時間が終了しました。新しい作業セッションを開始しましょう！",
+              });
+            }
+
             return {
               ...prev,
               status: "initial",
@@ -117,11 +139,21 @@ export const useTimer = () => {
             };
           } else {
             // フォーカス時間終了時
+
+            // 作業終了時に通知を表示
+            if (typeof window !== "undefined") {
+              showNotification({
+                title: "作業終了",
+                body: "お疲れ様でした！休憩時間です。",
+              });
+            }
+
+            // 休憩モードに切り替える際に、残り時間を確実に休憩時間の設定値に設定
             return {
               ...prev,
               status: "completed",
               isBreak: true,
-              remainingTime: prev.breakDuration,
+              remainingTime: prev.breakDuration, // 確実に休憩時間の設定値を使用
             };
           }
         }
