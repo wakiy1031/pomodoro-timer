@@ -11,6 +11,7 @@ import {
   Switch,
   HStack,
   Text,
+  useNotice,
 } from "@yamada-ui/react";
 import { BellIcon } from "lucide-react";
 import { useNotification } from "@/hooks/useNotification";
@@ -19,6 +20,13 @@ export const NotificationPermission = () => {
   const { permission, requestPermission, isEnabled, toggleNotifications } =
     useNotification();
   const [showAlert, setShowAlert] = useState(false);
+  const [localEnabled, setLocalEnabled] = useState(isEnabled);
+  const notice = useNotice();
+
+  // isEnabledの変更を追跡して、ローカルの状態を更新
+  useEffect(() => {
+    setLocalEnabled(isEnabled);
+  }, [isEnabled]);
 
   // 初回レンダリング時に通知許可状態を確認
   useEffect(() => {
@@ -39,12 +47,32 @@ export const NotificationPermission = () => {
     const result = await requestPermission();
     if (result === "granted") {
       setShowAlert(false);
+      notice({
+        title: "通知が許可されました",
+        description: "タイマー終了時に通知が表示されます。",
+        status: "success",
+      });
+    } else {
+      notice({
+        title: "通知が許可されませんでした",
+        description: "ブラウザの設定から通知を許可してください。",
+        status: "warning",
+      });
     }
   };
 
   // 通知の有効/無効を切り替える
   const handleToggleNotifications = () => {
-    toggleNotifications();
+    const newState = toggleNotifications();
+    setLocalEnabled(newState);
+
+    notice({
+      title: newState ? "通知を有効にしました" : "通知を無効にしました",
+      description: newState
+        ? "タイマー終了時に通知が表示されます。"
+        : "タイマー終了時の通知は表示されません。",
+      status: newState ? "success" : "info",
+    });
   };
 
   // 通知がサポートされていない場合は警告を表示
@@ -85,7 +113,7 @@ export const NotificationPermission = () => {
   if (permission === "granted") {
     return (
       <Box mb={4}>
-        {isEnabled && (
+        {localEnabled && (
           <Alert status="success" variant="subtle" mb={4}>
             <AlertIcon />
             <Box>
@@ -102,10 +130,10 @@ export const NotificationPermission = () => {
           <Switch
             size="md"
             colorScheme="primary"
-            isChecked={isEnabled}
+            isChecked={localEnabled}
             onChange={handleToggleNotifications}
           />
-          <Text>{isEnabled ? "有効" : "無効"}</Text>
+          <Text>{localEnabled ? "有効" : "無効"}</Text>
         </HStack>
       </Box>
     );

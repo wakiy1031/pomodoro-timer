@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 interface NotificationOptions {
   title: string;
@@ -72,9 +72,9 @@ export const useNotification = () => {
   };
 
   // 通知の有効/無効を切り替える関数
-  const toggleNotifications = () => {
+  const toggleNotifications = useCallback(() => {
+    // 新しい状態を計算
     const newState = !isEnabled;
-    setIsEnabled(newState);
 
     // ローカルストレージに保存
     if (typeof window !== "undefined") {
@@ -85,8 +85,11 @@ export const useNotification = () => {
       }
     }
 
+    // 状態を更新（非同期処理の後に確実に実行されるようにする）
+    setIsEnabled(newState);
+
     return newState;
-  };
+  }, [isEnabled]);
 
   // 通知を表示する関数
   const showNotification = async (
