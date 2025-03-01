@@ -5,14 +5,13 @@ import { PlayIcon, PauseIcon, InfoIcon, CoffeeIcon } from "lucide-react";
 import { useTimer } from "@/hooks/useTimer";
 import { useAtom } from "jotai";
 import { timerSettingsAtom, timerProgressAtom } from "@/store/timerAtoms";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 const Timer = () => {
   const { session, startTimer, pauseTimer, resetTimer, skipBreak, formatTime } =
     useTimer();
   const [settings] = useAtom(timerSettingsAtom);
   const [progress] = useAtom(timerProgressAtom);
-  const [mounted, setMounted] = useState(true);
 
   // 現在のタイマー時間と設定時間が異なるかどうかを確認
   const isCustomized =

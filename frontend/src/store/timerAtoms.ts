@@ -45,6 +45,7 @@ export const timerSessionAtom = atomWithStorage<TimerSession>(
 
         return session;
       } catch (e) {
+        console.error("Failed to parse session from localStorage:", e);
         return initialValue;
       }
     },

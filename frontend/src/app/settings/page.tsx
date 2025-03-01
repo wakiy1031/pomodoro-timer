@@ -2,7 +2,6 @@
 
 import dynamic from "next/dynamic";
 import { Heading } from "@yamada-ui/react";
-import { useEffect, useState } from "react";
 // クライアントサイドでのみレンダリングされるコンポーネント
 const Layout = dynamic(() => import("@/components/layout"), {
   ssr: false,
@@ -27,8 +26,6 @@ const SettingsFormClient = dynamic(
 );
 
 export default function Settings() {
-  const [mounted, setMounted] = useState(true);
-
   return (
     <Layout>
       <div className="relative h-full">

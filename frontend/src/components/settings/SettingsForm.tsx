@@ -25,7 +25,6 @@ const SettingsForm = () => {
   const [session] = useAtom(timerSessionAtom);
   const [focusMinutes, setFocusMinutes] = useState("");
   const [breakMinutes, setBreakMinutes] = useState("");
-  const [mounted, setMounted] = useState(true);
   const notice = useNotice();
 
   // 初期値をセット

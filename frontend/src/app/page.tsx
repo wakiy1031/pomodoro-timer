@@ -1,7 +1,6 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useEffect, useState } from "react";
 
 // クライアントサイドでのみレンダリングされるコンポーネント
 const Layout = dynamic(() => import("@/components/layout"), {
@@ -24,8 +23,6 @@ const TimerClient = dynamic(() => import("@/components/timer/Timer"), {
 });
 
 export default function Home() {
-  const [mounted, setMounted] = useState(true);
-
   return (
     <Layout>
       <div className="relative flex justify-center items-center h-full">

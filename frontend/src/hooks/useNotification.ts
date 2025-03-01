@@ -5,9 +5,7 @@ import { useState, useEffect, useCallback } from "react";
 interface NotificationOptions {
   title: string;
   body: string;
-  icon?: string;
-  badge?: string;
-  data?: any;
+  data?: string;
 }
 
 export const useNotification = () => {
@@ -66,7 +64,8 @@ export const useNotification = () => {
       const result = await Notification.requestPermission();
       setPermission(result);
       return result;
-    } catch (error) {
+    } catch (e) {
+      console.error("Failed to request permission:", e);
       return "denied";
     }
   };
@@ -128,7 +127,8 @@ export const useNotification = () => {
         });
         return true;
       }
-    } catch (error) {
+    } catch (e) {
+      console.error("Failed to show notification:", e);
       return false;
     }
   };
