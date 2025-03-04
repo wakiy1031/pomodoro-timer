@@ -5,6 +5,7 @@ import { PlayIcon, PauseIcon, InfoIcon, CoffeeIcon } from "lucide-react";
 import { useTimer } from "@/hooks/useTimer";
 import { useAtom } from "jotai";
 import { timerSettingsAtom, timerProgressAtom } from "@/store/timerAtoms";
+import { useEffect } from "react";
 
 const Timer = () => {
   const { session, startTimer, pauseTimer, resetTimer, skipBreak, formatTime } =
@@ -22,6 +23,17 @@ const Timer = () => {
   // 休憩中かどうかに基づいてスタイルを変更
   const progressColor = session.isBreak ? "teal.400" : "primary";
   const textColor = session.isBreak ? "teal.700" : "inherit";
+
+  // 休憩モードの状態を確認し、必要に応じて自動的に開始
+  useEffect(() => {
+    if (
+      session.isBreak &&
+      session.status === "completed" &&
+      typeof window !== "undefined"
+    ) {
+      startTimer();
+    }
+  }, [session.isBreak, session.status, startTimer]);
 
   return (
     <Box className="flex flex-col items-center">

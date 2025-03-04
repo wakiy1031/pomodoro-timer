@@ -16,7 +16,9 @@ import {
   AlertIcon,
   AlertTitle,
   AlertDescription,
+  Divider,
 } from "@yamada-ui/react";
+import { NotificationPermission } from "@/components/notification/NotificationPermission";
 
 const SettingsForm = () => {
   const [settings, setSettings] = useAtom(timerSettingsAtom);
@@ -98,7 +100,7 @@ const SettingsForm = () => {
           </Alert>
         )}
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="w-full max-w-md">
           <VStack gap={4} alignItems="stretch">
             <FormControl>
               <Text fontWeight="bold" mb={2}>
@@ -131,6 +133,18 @@ const SettingsForm = () => {
             </Button>
           </VStack>
         </form>
+
+        <Divider my={6} />
+
+        <Box w="full">
+          <Heading size="md" mb={4}>
+            通知設定
+          </Heading>
+          <Text mb={4}>
+            タイマー終了時に通知を受け取るには、ブラウザの通知を許可してください。
+          </Text>
+          <NotificationPermission />
+        </Box>
       </VStack>
     </Box>
   );

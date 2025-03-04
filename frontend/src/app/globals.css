@@ -5,17 +5,38 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --transition-duration: 0.2s;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+.dark {
+  --background: #0a0a0a;
+  --foreground: #ededed;
+  color-scheme: dark;
 }
 
 body {
   color: var(--foreground);
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
+  transition: background-color var(--transition-duration) ease-in-out,
+    color var(--transition-duration) ease-in-out;
+}
+
+/* ダークモード切り替え時のちらつきを防止 */
+html {
+  transition: color-scheme var(--transition-duration) ease;
+}
+
+/* コンテンツのフェードイン */
+.fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }

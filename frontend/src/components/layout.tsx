@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import type React from "react";
 import {
   Button,
@@ -14,6 +14,7 @@ import {
   DrawerBody,
   DrawerOverlay,
   DrawerCloseButton,
+  Tooltip,
 } from "@yamada-ui/react";
 import { useTheme } from "@/hooks/useTheme";
 import { Sun, Moon, Timer, Settings, Menu } from "lucide-react";
@@ -26,9 +27,9 @@ const SidebarContent = () => {
   return (
     <>
       <div className="mb-8"></div>
-      <nav className="flex-1">
-        <List className="space-y-2" gap={4}>
-          <ListItem>
+      <nav className="flex-1 w-fit">
+        <List className="space-y-2 w-full" gap={4}>
+          <ListItem className="w-fit">
             <Link href="/" className="w-full">
               <Button
                 w="full"
@@ -45,7 +46,7 @@ const SidebarContent = () => {
           {/* <ListItem>
             <Button className="w-full justify-start">統計</Button>
           </ListItem> */}
-          <ListItem>
+          <ListItem className="w-full">
             <Link href="/settings" className="w-full">
               <Button
                 w="full"
@@ -59,32 +60,45 @@ const SidebarContent = () => {
               </Button>
             </Link>
           </ListItem>
+          <ListItem>
+            <Tooltip
+              label={
+                isDarkMode ? "ライトモードに切り替え" : "ダークモードに切り替え"
+              }
+            >
+              <div className="flex items-center justify-between relative w-fit ml-3">
+                <Switch
+                  checked={!isDarkMode}
+                  onChange={toggleTheme}
+                  size="lg"
+                  border="2px solid"
+                  borderColor="white"
+                  borderRadius="full"
+                  colorScheme="white"
+                  aria-label={
+                    isDarkMode
+                      ? "ライトモードに切り替え"
+                      : "ダークモードに切り替え"
+                  }
+                />
+                <div className="absolute flex items-center justify-center pointer-events-none z-1 w-full h-full -translate-y-1/2 top-1/2">
+                  {isDarkMode ? (
+                    <Moon
+                      size={15}
+                      className="text-white absolute right-2 -translate-y-1/2 top-1/2"
+                    />
+                  ) : (
+                    <Sun
+                      size={15}
+                      className="text-white absolute left-2 -translate-y-1/2 top-1/2"
+                    />
+                  )}
+                </div>
+              </div>
+            </Tooltip>
+          </ListItem>
         </List>
       </nav>
-      <div className="flex items-center justify-between relative w-fit mb-4">
-        <Switch
-          checked={!isDarkMode}
-          onChange={toggleTheme}
-          size="lg"
-          border="2px solid"
-          borderColor="white"
-          borderRadius="full"
-          colorScheme="white"
-        />
-        <div className="absolute flex items-center justify-center pointer-events-none z-1 w-full h-full -translate-y-1/2 top-1/2">
-          {isDarkMode ? (
-            <Moon
-              size={15}
-              className="text-white absolute right-2 -translate-y-1/2 top-1/2"
-            />
-          ) : (
-            <Sun
-              size={15}
-              className="text-white absolute left-2 -translate-y-1/2 top-1/2"
-            />
-          )}
-        </div>
-      </div>
     </>
   );
 };
@@ -99,8 +113,11 @@ const Sidebar = () => {
 };
 
 // モバイル用ドロワーコンポーネント
-const MobileDrawer = () => {
+const MobileDrawer = ({ isVisible }: { isVisible: boolean }) => {
   const { open, onOpen, onClose } = useDisclosure();
+
+  // isVisibleがfalseの場合は何もレンダリングしない
+  if (!isVisible) return null;
 
   return (
     <>
@@ -131,46 +148,82 @@ const MobileDrawer = () => {
   );
 };
 
-// メディアクエリを使用して画面サイズを検出するカスタムフック
-const useMediaQuery = (query: string) => {
-  const [matches, setMatches] = useState(false);
-
-  useEffect(() => {
-    // サーバーサイドレンダリング時は何もしない
-    if (typeof window === "undefined") return;
-
-    const media = window.matchMedia(query);
-    const listener = () => setMatches(media.matches);
-
-    // 初期値を設定
-    setMatches(media.matches);
-
-    // リスナーを追加
-    media.addEventListener("change", listener);
-
-    // クリーンアップ
-    return () => media.removeEventListener("change", listener);
-  }, [query]);
-
-  return matches;
-};
-
 const Layout = ({ children }: { children: React.ReactNode }) => {
-  const { isDarkMode } = useTheme();
+  const { isDarkMode, isInitialized } = useTheme();
 
-  // カスタムフックを使用して画面サイズを検出
-  const isMobile = useMediaQuery("(max-width: 1024px)");
+  // hydrationの不一致を防ぐためのステート
+  const [isClient, setIsClient] = useState(false);
+  // メディアクエリの結果を保持するステート
+  const [isDesktop, setIsDesktop] = useState(true); // デフォルトでデスクトップとして初期化
+  // レイアウトが安定したかどうかを追跡
+  const [layoutStable, setLayoutStable] = useState(false);
+  // 初期レンダリングを追跡
+  const initialRenderRef = useRef(true);
+
+  // クライアントサイドでのみレンダリングされるようにする
+  useEffect(() => {
+    setIsClient(true);
+
+    // レイアウトの安定化をさらに遅延させる
+    const layoutTimer = setTimeout(() => {
+      setLayoutStable(true);
+      initialRenderRef.current = false;
+    }, 300);
+
+    return () => {
+      clearTimeout(layoutTimer);
+    };
+  }, []);
+
+  // クライアントサイドでのみメディアクエリを実行
+  useEffect(() => {
+    if (!isClient) return;
+
+    try {
+      const mediaQuery = window.matchMedia("(min-width: 1024px)");
+
+      // 初期値を設定
+      setIsDesktop(mediaQuery.matches);
+
+      // リスナーを設定
+      const handleChange = (e: MediaQueryListEvent) => {
+        setIsDesktop(e.matches);
+      };
+
+      // リスナーを追加
+      mediaQuery.addEventListener("change", handleChange);
+
+      // クリーンアップ
+      return () => {
+        mediaQuery.removeEventListener("change", handleChange);
+      };
+    } catch (error) {
+      console.error("Error in media query:", error);
+    }
+  }, [isClient]);
+
+  // 初期レンダリング時のスケルトン表示
+  if (!isClient || !isInitialized) {
+    return (
+      <div className="min-h-screen bg-white dark:bg-gray-800 flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
 
   return (
     <div className={`min-h-screen ${isDarkMode ? "dark" : ""}`}>
       <div className="flex h-dvh">
-        {isMobile && <Sidebar />}
-        {!isMobile && <MobileDrawer />}
-        <main
-          className={`flex-1 p-8 h-dvh bg-white dark:bg-gray-800 text-gray-900 dark:text-white ${
-            isMobile ? "w-full" : ""
-          }`}
-        >
+        {/* サイドバーは常に同じ位置に表示（表示/非表示の切り替えのみ） */}
+        <div className={`${isDesktop ? "block" : "hidden"} w-64`}>
+          <Sidebar />
+        </div>
+
+        {/* モバイルメニューはクライアントサイドでのみ表示し、レイアウトが安定した後に表示 */}
+        <MobileDrawer isVisible={isClient && !isDesktop && layoutStable} />
+
+        {/* メインコンテンツ領域 */}
+        <main className="flex-1 p-8 h-dvh bg-white dark:bg-gray-800 text-gray-900 dark:text-white transition-colors duration-200">
           {children}
         </main>
       </div>

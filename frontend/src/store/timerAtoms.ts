@@ -23,9 +23,39 @@ const initialSession: TimerSession = {
   isBreak: false,
 };
 
+// セッション状態の永続化
+// ページリロード時にも状態を保持するが、初期化時に残り時間を正しく設定
 export const timerSessionAtom = atomWithStorage<TimerSession>(
   "currentTimerSession",
-  initialSession
+  initialSession,
+  {
+    // カスタムストレージイベントハンドラ
+    getItem: (key, initialValue) => {
+      // ローカルストレージから値を取得
+      const storedValue = localStorage.getItem(key);
+      if (!storedValue) return initialValue;
+
+      try {
+        const session = JSON.parse(storedValue) as TimerSession;
+
+        // 休憩モードの場合は、残り時間が正しく設定されているか確認
+        if (session.isBreak && session.status === "completed") {
+          session.remainingTime = session.breakDuration;
+        }
+
+        return session;
+      } catch (e) {
+        console.error("Failed to parse session from localStorage:", e);
+        return initialValue;
+      }
+    },
+    setItem: (key, value) => {
+      localStorage.setItem(key, JSON.stringify(value));
+    },
+    removeItem: (key) => {
+      localStorage.removeItem(key);
+    },
+  }
 );
 
 // タイマーのティック（1秒ごとの更新）用
